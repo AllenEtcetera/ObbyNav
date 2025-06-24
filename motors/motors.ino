@@ -41,20 +41,6 @@ void setup(){
   Serial.begin(9600);
   
 }
-void loop() {
-  if (Serial.available()) {
-    input = Serial.read();
-    switch (input) {
-      case 'f': forward(); break;
-      case 'b': backward(); break;
-      case 'l': turnLeft(); break;
-      case 'r': turnRight(); break;
-      case 's': stopMotors(); break;
-      case 'E': Serial.println(getDistance(trigFront, echoFront)); break;
-      case 'e': Serial.println(getDistance(trigBack, echoBack)); break;
-    }
-  }
-}
 void forward() {
   digitalWrite(In1, HIGH);
   digitalWrite(In2, LOW);
@@ -94,4 +80,31 @@ long getDistance(int trigPin, int echoPin) {
   long duration = pulseIn(echoPin, HIGH);
   long distance = duration * 0.034 / 2;
   return distance;
+}
+void loop() {
+  if (Serial.available()) {
+  char cmd;
+  if (Serial.available() > 0) {
+    cmd = Serial.read();
+    switch (cmd) {
+      case 'f':  // forward
+        forward();
+        break;
+      case 'b':  // backward
+        backward();
+        break;
+      case 'l':  // turn left
+        turnLeft();
+        break;
+      case 'r':  // turn right
+        turnRight();
+        break;
+      case 's':  // stop
+        stopMotors();
+        break;
+      case 'E': Serial.println(getDistance(trigFront, echoFront)); break;
+      case 'e': Serial.println(getDistance(trigBack, echoBack)); break;
+    }
+  }
+ } 
 }

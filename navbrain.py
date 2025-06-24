@@ -1,13 +1,27 @@
 #!/usr/bin/env python3
-
+import glob
 import serial
 import time
 import RPi.GPIO as GPIO
 
-SERIAL_PORT = '/dev/ttyUSB0'
+
+def find_arduino(baud=9600, timeout=1):
+    possible_ports = glob.glob('/dev/ttyUSB*') + glob.glob('/dev/ttyACM*')
+    for port in possible_ports:
+        try:
+            ser = serial.Serial(port, baudrate=baud, timeout=timeout)
+            ser.write(b'E')  # 'E' is for front sensor
+            response = ser.readline().decode('utf-8').strip()
+            if response:  # we expect a number like "25.4"
+                print(f"Arduino detected on {port}")
+                return ser
+        except (serial.SerialException, UnicodeDecodeError):
+            continue
+    raise IOError("Arduino not found on any serial port.")
+
+ser = find_arduino()
 BAUD_RATE = 9600
 minDist = 10
-ser = serial.Serial(SERIAL_PORT, BAUD_RATE, timeout=1)
 
 def send_command(cmd):
     ser.write(cmd.encode())

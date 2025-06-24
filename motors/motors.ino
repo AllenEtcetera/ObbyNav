@@ -82,10 +82,8 @@ long getDistance(int trigPin, int echoPin) {
   return distance;
 }
 void loop() {
-  if (Serial.available()) {
-  char cmd;
   if (Serial.available() > 0) {
-    cmd = Serial.read();
+    char cmd = Serial.read();
     switch (cmd) {
       case 'f':  // forward
         forward();
@@ -107,4 +105,3 @@ void loop() {
     }
   }
  } 
-}

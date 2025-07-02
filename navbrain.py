@@ -47,9 +47,18 @@ def decision_loop():
         if front_distance < minDist:
             send_command('s')
             #send_command('BEEP')  # Optional — if Arduino handles it
-            time.sleep(0.5)
+            time.sleep(0.25)
+            send_command('L:')
+            time.sleep(0.25)
+            send_command('C:')
+            time.sleep(0.25)
+            send_command('R:')
+            time.sleep(0.25)
+            send_command('C:')
             send_command('l')
-            time.sleep(0.5)
+            send_command('l')
+            send_command('l')
+            time.sleep(0.25)
             send_command('f')
         else:
             send_command('f')

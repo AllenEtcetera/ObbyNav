@@ -1,10 +1,12 @@
+#include <Servo.h>
+
 // Wheels
-int In1 = 7;
-int In2 = 8;
+int IN1 = 7;
+int IN2 = 8;
 int ENA = 5;
 
-int In3 = 9;
-int In4 = 10;
+int IN3 = 9;
+int IN4 = 10;
 int ENB = 6;
 
 int SPEED = 100;
@@ -18,18 +20,21 @@ const int trigBack = 12;
 const int echoBack = 13;
 
 // SG90 Servo Motor
+Servo head;
 const int servoPin = 11;
 
 char input;
 
 void setup(){
   // Wheels
-  pinMode(In1, OUTPUT);// A
-  pinMode(In2, OUTPUT);
+  pinMode(IN1, OUTPUT);// A
+  pinMode(IN2, OUTPUT);
   pinMode(ENA, OUTPUT);
-  pinMode(In3, OUTPUT);// B
-  pinMode(In4, OUTPUT);
+  pinMode(IN3, OUTPUT);// B
+  pinMode(IN4, OUTPUT);
   pinMode(ENB, OUTPUT);
+  analogWrite(ENA, 255);  // Full speed
+  analogWrite(ENB, 255);
 
   // Ultrasonics
   pinMode(trigFront, OUTPUT); // Front (E)
@@ -39,37 +44,62 @@ void setup(){
 
   // Start serial communication
   Serial.begin(9600);
+  head.attach(servoPin);
+  head.write(90);  // Center position
+
   
 }
 void forward() {
-  digitalWrite(In1, HIGH);
-  digitalWrite(In2, LOW);
-  digitalWrite(In3, HIGH);
-  digitalWrite(In4, LOW);
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, HIGH);
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, HIGH);
 }
 void backward() {
-  digitalWrite(In1, LOW);
-  digitalWrite(In2, HIGH);
-  digitalWrite(In3, LOW);
-  digitalWrite(In4, HIGH);
+  digitalWrite(IN1, HIGH);
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, HIGH);
+  digitalWrite(IN4, LOW);
 }
 void turnLeft() {
-  digitalWrite(In1, LOW);
-  digitalWrite(In2, HIGH);
-  digitalWrite(In3, HIGH);
-  digitalWrite(In4, LOW);
+  digitalWrite(IN1, HIGH);
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, HIGH);
 }
 void turnRight() {
-  digitalWrite(In1, HIGH);
-  digitalWrite(In2, LOW);
-  digitalWrite(In3, LOW);
-  digitalWrite(In4, HIGH);
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, HIGH);
+  digitalWrite(IN3, HIGH);
+  digitalWrite(IN4, LOW);
 }
 void stopMotors() {
-  digitalWrite(In1, LOW);
-  digitalWrite(In2, LOW);
-  digitalWrite(In3, LOW);
-  digitalWrite(In4, LOW);
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, LOW);
+}
+void scanHead() {
+  long leftDist, centerDist, rightDist;
+
+  Servo.write(0);    // Left
+  delay(500);
+  leftDist = measureDistance();
+
+  Servo.write(90);   // Center
+  delay(500);
+  centerDist = measureDistance();
+
+  Servo.write(180);  // Right
+  delay(500);
+  rightDist = measureDistance();
+
+  Serial.print("L:");
+  Serial.print(leftDist);
+  Serial.print(",C:");
+  Serial.print(centerDist);
+  Serial.print(",R:");
+  Serial.println(rightDist);
 }
 long getDistance(int trigPin, int echoPin) {
   digitalWrite(trigPin, LOW);
@@ -85,6 +115,9 @@ void loop() {
   if (Serial.available() > 0) {
     char cmd = Serial.read();
     switch (cmd) {
+      case 'h':
+        scanHead();
+        break;
       case 'f':  // forward
         forward();
         break;

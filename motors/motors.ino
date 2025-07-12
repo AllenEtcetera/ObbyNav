@@ -23,6 +23,9 @@ const int echoBack = 13;
 Servo head;
 const int servoPin = 11;
 
+// Active Buzzer
+const int buzzPin = 4;
+
 char input;
 
 void setup(){
@@ -41,11 +44,13 @@ void setup(){
   pinMode(echoFront, INPUT);
   pinMode(trigBack, OUTPUT); // Back (e)
   pinMode(echoBack, INPUT);
-
+  // Buzzer
+  pinMode(buzzPin, OUTPUT);
+  
   // Start serial communication
   Serial.begin(9600);
   head.attach(servoPin);
-  head.write(90);  // Center position
+  head.write(150);  // Center position
 
   
 }
@@ -82,17 +87,17 @@ void stopMotors() {
 void scanHead() {
   long leftDist, centerDist, rightDist;
 
-  Servo.write(0);    // Left
+  head.write(250);    // Left
   delay(500);
-  leftDist = measureDistance();
+  leftDist = getDistance(trigFront, echoFront);
 
-  Servo.write(90);   // Center
+  head.write(150);   // Center
   delay(500);
-  centerDist = measureDistance();
+  centerDist = getDistance(trigFront, echoFront);
 
-  Servo.write(180);  // Right
+  head.write(50);  // Right
   delay(500);
-  rightDist = measureDistance();
+  rightDist = getDistance(trigFront, echoFront);
 
   Serial.print("L:");
   Serial.print(leftDist);
@@ -110,6 +115,11 @@ long getDistance(int trigPin, int echoPin) {
   long duration = pulseIn(echoPin, HIGH);
   long distance = duration * 0.034 / 2;
   return distance;
+}
+void cry() {
+  tone(buzzPin, 1000, 250);  // On
+  delay(200);
+  digitalWrite(buzzPin, LOW);   // Off
 }
 void loop() {
   if (Serial.available() > 0) {
@@ -133,8 +143,15 @@ void loop() {
       case 's':  // stop
         stopMotors();
         break;
-      case 'E': Serial.println(getDistance(trigFront, echoFront)); break;
-      case 'e': Serial.println(getDistance(trigBack, echoBack)); break;
+      case 'E':
+        Serial.println(getDistance(trigFront, echoFront));
+        break;
+      case 'e':
+        Serial.println(getDistance(trigBack, echoBack));
+        break;
+      case 'A':
+        cry();
+        break;
     }
   }
  } 

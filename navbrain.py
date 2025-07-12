@@ -29,6 +29,23 @@ def send_command(cmd):
     ser.write(cmd.encode())
     print(f"Sent: {cmd}")
 
+def scan_head():
+    ser.flushInput()
+    send_command('h')
+    time.sleep(0.3)
+    try:
+        line = ser.readline().decode('utf-8').strip()
+        print(f"Scanned:{line}")
+        parts = line.split(',')
+        scanData = {}
+        for i in parts:
+            lbl, dist = i.split(':')
+            scanData[lbl] = float(dist)
+        return scanData
+    except Exception as e:
+        print(f"Scan failed: {e}")
+        return {'L': 1000, 'C': 1000, 'R': 1000}
+
 def read_distance(source='front'):
     command = 'E' if source == 'front' else 'e'
     ser.flushInput()
@@ -42,23 +59,38 @@ def read_distance(source='front'):
 
 def decision_loop():
     while True:
-        front_distance = read_distance('front')
-        print(f"Front distance: {front_distance} cm")
-        if front_distance < minDist:
+        frontDist = read_distance('front')
+        backDist = read_distance('back')
+        print(f"Front distance: {frontDist} cm")
+        print(f"Back distance: {backDist} cm")
+        if frontDist < minDist:
             send_command('s')
-            #send_command('BEEP')  # Optional — if Arduino handles it
             time.sleep(0.25)
-            send_command('h')
-            time.sleep(0.25)
-            send_command('l')
-            send_command('l')
-            send_command('l')
-            time.sleep(0.25)
-            send_command('f')
+            scanData = scan_head()
+            print(scanData)
+            bestDir = max(scanData, key=scanData.get)
+            maxDist = scanData[bestDir]
+            if maxDist > minDist:
+                if bestDir == 'L': # If left has more distance, go left
+                    send_command('l')
+                    time.sleep(0.25)
+                elif bestDir == 'R': # If right has more distance, go right
+                    send_command('r')
+                    time.sleep(0.25)
+                send_command('f') # No turn if already centered
+            else:
+                if backDist < minDist:
+                    send_command('s')
+                    send_command('A')
+                    time.sleep(0.25)
+                    send_command('A')
+                else:
+                    send_command('b')
+                    time.sleep(0.25)
+                    send_command('s')
         else:
             send_command('f')
-        time.sleep(0.1)
-
+        
 try:
     decision_loop()
 except KeyboardInterrupt:

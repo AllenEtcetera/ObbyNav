@@ -50,7 +50,7 @@ void setup(){
   // Start serial communication
   Serial.begin(9600);
   head.attach(servoPin);
-  head.write(150);  // Center position
+  head.write(90);  // Center position
 
   
 }
@@ -87,17 +87,19 @@ void stopMotors() {
 void scanHead() {
   long leftDist, centerDist, rightDist;
 
-  head.write(250);    // Left
-  delay(500);
+  head.write(0);    // Left
+  delay(1000);
   leftDist = getDistance(trigFront, echoFront);
 
-  head.write(150);   // Center
-  delay(500);
+  head.write(90);   // Center
+  delay(1000);
   centerDist = getDistance(trigFront, echoFront);
 
-  head.write(50);  // Right
-  delay(500);
+  head.write(180);  // Right
+  delay(1000);
   rightDist = getDistance(trigFront, echoFront);
+
+  head.write(90);  // Back to center
 
   Serial.print("L:");
   Serial.print(leftDist);
@@ -108,11 +110,13 @@ void scanHead() {
 }
 long getDistance(int trigPin, int echoPin) {
   digitalWrite(trigPin, LOW);
-  delayMicroseconds(2);
+  delayMicroseconds(5);
   digitalWrite(trigPin, HIGH);
   delayMicroseconds(10);
   digitalWrite(trigPin, LOW);
-  long duration = pulseIn(echoPin, HIGH);
+  delayMicroseconds(5);
+  long duration = pulseIn(echoPin, HIGH, 30000);
+  if (duration == 0) return 999;  // error handling
   long distance = duration * 0.034 / 2;
   return distance;
 }

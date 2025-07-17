@@ -4,14 +4,14 @@ import serial
 import time
 import cv2
 import numpy as np
-import RPi.GPIO as GPIO
+#import RPi.GPIO as GPIO
 from pathlib import Path
 import datetime
 
-
-SERIAL_PORT = '/dev/ttyACM0'
+#SERIAL_PORT = '/dev/ttyACM0'
+SERIAL_PORT = '/dev/ttyACM4'
 BAUD_RATE = 9600
-minDist = 40
+minDist = 15
 ser = serial.Serial(SERIAL_PORT, BAUD_RATE, timeout=1)
 
 def send_command(cmd):
@@ -21,7 +21,7 @@ def send_command(cmd):
 def scan_head():
     ser.flushInput()
     send_command('h')
-    time.sleep(0.3)
+    time.sleep(3.0)
     try:
         line = ser.readline().decode('utf-8').strip()
         print(f"Scanned:{line}")
@@ -138,10 +138,12 @@ def main():
                     continue  # skip further logic this cycle
                 send_command('b')
                 time.sleep(0.5)
+                send_command('s')
                 scanData = scan_head()
                 print(scanData)
                 bestDir = max(scanData, key=scanData.get)
                 maxDist = scanData[bestDir]
+                print(f"Best Direction: {bestDir} at {maxDist}")
                 if maxDist > minDist:
                     if bestDir == 'L': # If left has more distance, go left
                         send_command('l')
@@ -169,7 +171,7 @@ def main():
         decision_loop()
     except KeyboardInterrupt:
         send_command('s')
-        GPIO.cleanup()
+        #GPIO.cleanup()
         ser.close()
 
 if __name__ == "__main__":

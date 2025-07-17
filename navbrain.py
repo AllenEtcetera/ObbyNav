@@ -8,8 +8,7 @@ import numpy as np
 from pathlib import Path
 import datetime
 
-#SERIAL_PORT = '/dev/ttyACM0'
-SERIAL_PORT = '/dev/ttyACM4'
+SERIAL_PORT = '/dev/ttyACM0'
 BAUD_RATE = 9600
 minDist = 15
 ser = serial.Serial(SERIAL_PORT, BAUD_RATE, timeout=1)

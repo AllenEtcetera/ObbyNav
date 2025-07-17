@@ -31,11 +31,17 @@ def scan_head():
             if ':' not in i:
                 continue  # skip bad data
             lbl, dist = i.split(':')
-            scanData[lbl] = float(dist)
+            try:
+                scanData[lbl] = float(dist)
+            except ValueError:
+                scanData[lbl] = 0
+        for k in ['L','C','R']:
+            if k not in scanData:
+                scanData[k] = 0
         return scanData
     except Exception as e:
         print(f"Scan failed: {e}")
-        return {'L': 40, 'C': 40, 'R': 40}
+        return {'L': 0, 'C': 0, 'R': 0}
 
 def read_distance(source='front'):
     command = 'E' if source == 'front' else 'e'

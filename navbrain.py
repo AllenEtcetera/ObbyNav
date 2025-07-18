@@ -57,28 +57,17 @@ def read_distance(source='front'):
         return 1000  # return a large default distance on failure
 
 def cap_door():
-    cap = cv2.VideoCapture("/dev/video3")
     filename = datetime.datetime.now().strftime("door_%Y%m%d_%H%M%S.jpg")
-    ret, frame = cap.read()
-    cap.release()
-    if ret:
-        cv2.imwrite("live.jpg", frame)
-        return find_door("live.jpg", filename)
-    if not ret:
-        print("Camera capture failed.")
-
-# def cap_door():
-#     filename = datetime.datetime.now().strftime("door_%Y%m%d_%H%M%S.jpg")
-#     full_path = f"frames/{filename}"
-#     # Ensure output directory exists
-#     if not os.path.exists("frames"):
-#         os.makedirs("frames")
-#     # Capture using libcamera-jpeg with no preview and verbose error reporting
-#     result = os.system(f"libcamera-jpeg -o {full_path} --width 640 --height 480 --nopreview --timeout 1000")
-#     if result != 0 or not os.path.exists(full_path):
-#         print(f"Camera capture failed or file not created: {full_path}")
-#         return False
-#     return find_door(full_path, filename)
+    full_path = f"frames/{filename}"
+    # Ensure output directory exists
+    if not os.path.exists("frames"):
+        os.makedirs("frames")
+    # Capture using libcamera-jpeg with no preview and verbose error reporting
+    result = os.system(f"libcamera-jpeg -o {full_path} --width 640 --height 480 --nopreview --timeout 1000")
+    if result != 0 or not os.path.exists(full_path):
+        print(f"Camera capture failed or file not created: {full_path}")
+        return False
+    return find_door(full_path, filename)
 
 def find_door(path, outPath):
     # Load the image

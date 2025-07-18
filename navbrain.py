@@ -4,7 +4,6 @@ import serial
 import time
 import cv2
 import numpy as np
-#import RPi.GPIO as GPIO
 from pathlib import Path
 import datetime
 
@@ -54,7 +53,7 @@ def read_distance(source='front'):
         return 1000  # return a large default distance on failure
 
 def cap_door():
-    cap = cv2.VideoCapture("/dev/video0")
+    cap = cv2.VideoCapture("/dev/media3")
     filename = datetime.datetime.now().strftime("door_%Y%m%d_%H%M%S.jpg")
     ret, frame = cap.read()
     cap.release()
@@ -69,7 +68,6 @@ def find_door(path, outPath):
     imgPath = cv2.imread(str(path))
     image = cv2.resize(imgPath, (640, 480))
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-
     # Edge detection
     blurred = cv2.GaussianBlur(gray, (5, 5), 0)
     edges = cv2.Canny(blurred, 50, 150)
@@ -111,10 +109,10 @@ def find_door(path, outPath):
         for x1, y1, x2, y2 in best_pair["lines"]:
             cv2.line(image, (x1, y1), (x2, y2), (0, 255, 0), 2)
         print(f"DOOR FOUND! Saved to {outPath}")
-        #cv2.imwrite(outPath, image)
+        cv2.imwrite(outPath, image)
         return True
     else:
-        print(f" NO DOOR!")
+        print(f"NO DOOR!")
         return False
 
 def main():
@@ -157,12 +155,11 @@ def main():
                         print("I'm stuck!")
                         for _ in range(3):  # or just once if continuous buzz
                             send_command('A')
-                            time.sleep(0.5)
+                            time.sleep(1.0)
                     else:
                         send_command('b')
                         time.sleep(0.5)
                         send_command('s')
-
             else:
                 send_command('f')
 
@@ -170,7 +167,6 @@ def main():
         decision_loop()
     except KeyboardInterrupt:
         send_command('s')
-        #GPIO.cleanup()
         ser.close()
 
 if __name__ == "__main__":

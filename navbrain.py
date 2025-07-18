@@ -4,17 +4,21 @@ import serial
 import time
 import cv2
 import numpy as np
+import os
 from pathlib import Path
 import datetime
 
 SERIAL_PORT = '/dev/ttyACM0'
 BAUD_RATE = 9600
-minDist = 15
+minDist = 20
 ser = serial.Serial(SERIAL_PORT, BAUD_RATE, timeout=1)
 
 def send_command(cmd):
     ser.write(cmd.encode())
-    print(f"Sent: {cmd}")
+    if cmd == 'f':
+        return
+    else:
+        print(f"Sent: {cmd}")
 
 def scan_head():
     ser.flushInput()
@@ -52,16 +56,23 @@ def read_distance(source='front'):
     except (ValueError, UnicodeDecodeError):
         return 1000  # return a large default distance on failure
 
+# def cap_door():
+#     cap = cv2.VideoCapture("/dev/video3")
+#     filename = datetime.datetime.now().strftime("door_%Y%m%d_%H%M%S.jpg")
+#     ret, frame = cap.read()
+#     cap.release()
+#     if ret:
+#         cv2.imwrite("live.jpg", frame)
+#         return find_door("live.jpg", filename)
+#     if not ret:
+#         print("Camera capture failed.")
+
 def cap_door():
-    cap = cv2.VideoCapture("/dev/media3")
     filename = datetime.datetime.now().strftime("door_%Y%m%d_%H%M%S.jpg")
-    ret, frame = cap.read()
-    cap.release()
-    if ret:
-        cv2.imwrite("live.jpg", frame)
-        return find_door("live.jpg", filename)
-    if not ret:
-        print("Camera capture failed.")
+    fullPath = f"frames/{filename}"
+    os.system(f"libcamera-jpeg -o {fullPath} --width 640 --height 480 --nopreview")
+    return find_door(fullPath, filename)
+
 
 def find_door(path, outPath):
     # Load the image
@@ -144,10 +155,10 @@ def main():
                 if maxDist > minDist:
                     if bestDir == 'L': # If left has more distance, go left
                         send_command('l')
-                        time.sleep(0.5)
+                        time.sleep(1.0)
                     elif bestDir == 'R': # If right has more distance, go right
                         send_command('r')
-                        time.sleep(0.5)
+                        time.sleep(1.0)
                     send_command('f') # No turn if already centered
                 else:
                     if backDist < minDist:
@@ -155,7 +166,7 @@ def main():
                         print("I'm stuck!")
                         for _ in range(3):  # or just once if continuous buzz
                             send_command('A')
-                            time.sleep(1.0)
+                            time.sleep(2.0)
                     else:
                         send_command('b')
                         time.sleep(0.5)

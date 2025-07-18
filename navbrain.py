@@ -133,35 +133,33 @@ def choose_direction(scanData):
 def decision_loop():
     minDist = 20
     while True:
-        frontDist = read_distance('front')
-        backDist = read_distance('back')
+        frontDist = read_distance('E')
+        backDist = read_distance('e')
         print(f"Front: {frontDist} cm\nBack: {backDist} cm")
         if frontDist < minDist:
             send_command('s')
-            time.sleep(0.25)
-                # Door check before backing up
             print("Obstacle detected. Checking for doorway...")
-            doorway = cap_door()
-            if doorway:  # Add logic to verify if door detected
+            if cap_door(): # Add logic to verify if door detected
                 print("Doorway detected! Proceeding forward.")
                 send_command('f')
+                continue
+            else:
+                send_command('b')
                 time.sleep(1)
-                continue  # Skip further logic this cycle
-            send_command('b')
-            time.sleep(0.75)
-            send_command('s')
-            scan = scan_head()
-            print(scan)
-            direction = choose_direction(scan)
-            send_command(direction.lower())
+                send_command('s')
+                scan = scan_head()
+                direction = choose_direction(scan)
+                send_command(direction.lower())
+                time.sleep(1)
+                send_command('s')
         elif frontDist >= minDist:
             send_command('f')
         if frontDist < minDist > backDist:
-                send_command('s')
-                print("I'M STUCK!")
-                for _ in range(3):  # or just once if continuous buzz
-                    send_command('A')
-                    time.sleep(0.4)
+            send_command('s')
+            print("I'm stuck!")
+            for _ in range(3):
+                send_command('A')
+                time.sleep(0.4)
 
 try:
     decision_loop()

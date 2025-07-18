@@ -133,8 +133,8 @@ def choose_direction(scanData):
 def decision_loop():
     minDist = 20
     while True:
-        frontDist = read_distance('E')
-        backDist = read_distance('e')
+        frontDist = read_distance('front')
+        backDist = read_distance('back')
         print(f"Front: {frontDist} cm\nBack: {backDist} cm")
         if frontDist < minDist:
             send_command('s')

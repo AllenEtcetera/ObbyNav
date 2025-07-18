@@ -131,7 +131,7 @@ def choose_direction(scanData):
 
 # Main behavior loop for navigation and decisions
 def decision_loop():
-    minDist = 20
+    minDist = 15
     while True:
         frontDist = read_distance('front')
         backDist = read_distance('back')
@@ -145,7 +145,7 @@ def decision_loop():
                 continue
             else:
                 send_command('b')
-                time.sleep(1)
+                time.sleep(0.25)
                 send_command('s')
                 scan = scan_head()
                 direction = choose_direction(scan)

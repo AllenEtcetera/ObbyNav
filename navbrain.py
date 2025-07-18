@@ -72,8 +72,8 @@ def cap_door():
 def find_door(path, outPath):
     # Load the image
     imgPath = cv2.imread(str(path))
-    image = cv2.resize(imgPath, (640, 480))
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    img = cv2.rotate(imgPath, cv2.ROTATE_180)
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     # Edge detection
     blurred = cv2.GaussianBlur(gray, (5, 5), 0)
     edges = cv2.Canny(blurred, 50, 150)
@@ -88,7 +88,7 @@ def find_door(path, outPath):
             dy = abs(y2 - y1)
             if dx < 10 and dy > 50:
                 vertical_lines.append((x1, y1, x2, y2))
-                cv2.line(image, (x1, y1), (x2, y2), (0, 255, 255), 1)  # Yellow = all vertical lines
+                cv2.line(img, (x1, y1), (x2, y2), (0, 255, 255), 1)  # Yellow = all vertical lines
     # Try to find pairs of vertical lines
     pairs_found = []
     for i in range(len(vertical_lines)):
@@ -104,18 +104,17 @@ def find_door(path, outPath):
                     "center": mid_x,
                     "lines": [(x1a, y1a, x2a, y2a), (x1b, y1b, x2b, y2b)]
                 })
-                cv2.rectangle(image, (min(x1a, x1b), 0), (max(x1a, x1b), 480), (255, 0, 0), 1)  # Blue = candidate pairs
-    # Highlight best (most centered) pair
-    cv2.line(image, (320, 0), (320, 480), (200, 200, 200), 1)  # Gray center line
+                cv2.rectangle(img, (min(x1a, x1b), 0), (max(x1a, x1b), 480), (255, 0, 0), 1)  # Blue = candidate pairs
+    cv2.line(img, (320, 0), (320, 480), (200, 200, 200), 1)  # Gray center line
     if pairs_found:
         best_pair = min(pairs_found, key=lambda p: abs(p["center"] - 320))  # 320 = center of image
         xa, xb = best_pair["coords"]
-        cv2.rectangle(image, (min(xa, xb), 0), (max(xa, xb), 480), (0, 255, 0), 3)  # Green = best pair
+        cv2.rectangle(img, (min(xa, xb), 0), (max(xa, xb), 480), (0, 255, 0), 3)  # Green = best pair
         # Draw individual lines in green for clarity
         for x1, y1, x2, y2 in best_pair["lines"]:
-            cv2.line(image, (x1, y1), (x2, y2), (0, 255, 0), 2)
+            cv2.line(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
         print(f"DOOR FOUND! Saved to {outPath}")
-        cv2.imwrite(outPath, image)
+        cv2.imwrite(outPath, img)
         return True
     else:
         print(f"NO DOOR!")

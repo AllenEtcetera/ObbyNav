@@ -138,7 +138,9 @@ def decision_loop():
         print(f"Front: {frontDist} cm\nBack: {backDist} cm")
         if frontDist < minDist:
             send_command('s')
-            print("Obstacle detected. Checking for doorway...")
+            print("Obstacle detected!")
+            time.sleep(0.75)
+            print("Checking for doorway...")
             if cap_door(): # Add logic to verify if door detected
                 print("Doorway detected! Proceeding forward.")
                 send_command('f')
